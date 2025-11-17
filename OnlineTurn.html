@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Online turn </title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+:root{--bg1:#faeef4;--accent:#ff6f91;--accent-dark:#b02e4a;--soft:#ffd6e8;--card:#ffffff;--muted:#6b2a3a88}
+*{box-sizing:border-box}body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(180deg,var(--bg1),#fff);color:#333}.header{background:linear-gradient(90deg,#ffd6e8,#fff7fb);padding:12px 0;box-shadow:0 6px 20px rgba(176,46,74,0.06)}.container{width:min(1100px,94%);margin:0 auto;padding:18px 0}.header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:12px}.logo{height:46px}.brand-title{font-weight:700;color:var(--accent-dark);font-size:20px}nav ul{display:flex;gap:14px;list-style:none;margin:0;padding:0}nav a{text-decoration:none;color:var(--accent-dark);font-weight:600}.hero{background:linear-gradient(135deg,var(--soft),#ffeef6);border-radius:16px;padding:22px;margin:18px 0;display:flex;gap:20px;align-items:center;justify-content:space-between}.hero h1{margin:0;font-size:26px;color:var(--accent-dark)}.hero p{margin:6px 0 0 0;color:#5a2a39}.button{display:inline-block;background:var(--accent);color:white;padding:10px 18px;border-radius:26px;text-decoration:none;font-weight:700;box-shadow:0 10px 24px rgba(255,111,145,0.12)}.section{margin-top:18px}.section h2{margin:0 0 8px 0;color:var(--accent-dark)}.map-controls{display:flex;gap:8px;margin-bottom:8px}.map-controls input{flex:1;padding:10px;border-radius:8px;border:1px solid #f0d5df}.map-controls button{padding:10px 14px;border-radius:8px;border:none;background:var(--accent);color:white}#map{height:340px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,0.06);background:#e9e9e9}.calendar-wrap{display:flex;gap:18px;flex-wrap:wrap}.calendar-card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.04);flex:1;min-width:320px}.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cal-cell{padding:8px;border-radius:8px;min-height:64px;background:linear-gradient(180deg,#fff,#fff);border:1px solid #fbf0f4}.cal-cell.today{box-shadow:0 4px 12px rgba(176,46,74,0.08);border:1px solid rgba(176,46,74,0.15)}.cal-cell .date-num{font-weight:700;color:var(--accent-dark);font-size:14px}.event{background:#ffeef6;border-radius:8px;padding:4px;margin-top:6px;font-size:13px;color:var(--accent-dark)}.chat-area{display:flex;flex-direction:column;gap:8px}.chat-box{background:var(--card);border-radius:12px;padding:12px;height:220px;overflow:auto;border:1px solid #f3dfe8}.chat-box p{margin:8px 0;padding:8px;border-radius:10px;max-width:85%}.chat-box .user{background:#ffeef6;margin-left:auto;text-align:right}.chat-box .bot{background:#fff7fb;margin-right:auto;text-align:left}.chat-controls{display:flex;gap:8px;margin-top:6px}.chat-controls input{flex:1;padding:10px;border-radius:10px;border:1px solid #f0d5df}.chat-controls button{padding:10px 16px;border-radius:10px;border:none;background:var(--accent-dark);color:white}.cards{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}.card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.04);flex:1;min-width:200px}.footer{margin-top:22px;padding:12px 0;text-align:center;color:#7a3a45;font-size:14px}#welcome{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s}#welcome.show{opacity:1;pointer-events:auto}.w-content{background:linear-gradient(135deg,#fff,#fff);padding:22px;border-radius:12px;max-width:520px;width:92%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.18)}.w-emoji{font-size:40px;margin-bottom:8px}.w-title{font-size:20px;color:var(--accent-dark);margin:6px 0}.w-text{color:#5a2a39;margin-bottom:12px}@media (max-width:820px){.hero{flex-direction:column;text-align:center}.calendar-wrap{flex-direction:column}#map{height:260px}.chat-box{height:180px}}
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+<div id="welcome" class="show" aria-hidden="false">
+  <div class="w-content" role="dialog" aria-modal="true">
+    <div class="w-emoji">💖</div>
+    <div class="w-title">Bienvenida a OnlineTurn</div>
+    <div class="w-text">Tu espacio para cuidar de ti y tu bebé. Agenda, encuentra hospitales y consulta a MamáIA.</div>
+    <button id="enterBtn" class="button">Entrar ahora</button>
+  </div>
+</div>
+
+<header class="header">
+  <div class="container header-inner">
+    <div class="brand">
+      <img src="file:///C:/Users/SERTEC-2019/Downloads/OnlineTurn-removebg-preview.png" width="300" height="60">
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#mapa">Hospitales</a></li>
+        <li><a href="#calendario">Calendario</a></li>
+        <a href="#boleta" class="nav-btn">Boleta</a>
+        <li><a href="#chat">Chat IA</a></li>
+        <li><a href="#resources">Consejos</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div>
+      <h1>Bienvenida!</h1>
+      <p>Organiza tu salud de manera fácil y rápida, podrás agendar citas médicas, encontrar hospitales cercanos y recibir apoyo personalizado, todo desde un mismo lugar y completamente gratis. Tu bienestar está al alcance de un clic.</p>
+      <div style="margin-top:10px"><a class="button" href="#calendario">Ir al Calendario</a></div>
+    </div>
+    <div> <img src="https://partonaturalmadrid.es/wp-content/uploads/2021/06/1-cambios-en-el-cuerpo-durante-el-embarazo-1024x683.png" alt="Imagen" width="300">
+  </section>
+
+  <section id="mapa" class="section">
+    <h2>Hospitales Cercanos</h2>
+    <div class="map-controls"><input id="addressInput" placeholder="Ciudad o dirección (opcional)"/><button id="findBtn">Buscar cerca</button></div>
+    <div id="map" aria-label="Mapa de hospitales"></div>
+    <p class="hint">Permite la geolocalización para una búsqueda automática o escribe tu dirección.</p>
+  </section>
+
+  <section id="calendario" class="section">
+    <h2>Calendario Prenatal (Agenda)</h2>
+    <div class="calendar-wrap">
+      
+      <div class="calendar-card" id="calendarCard">
+        <div class="cal-header">
+          <div><strong id="calMonthYear"></strong></div>
+          <div><button id="prevMonth">◀</button><button id="nextMonth">▶</button></div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <p style="font-size:13px;color:#666;margin-top:8px">Haz clic en un día para crear una cita. Las citas se guardan en tu navegador.</p>
+      </div>
+
+      <div class="calendar-card">
+        <h3>Eventos guardados</h3>
+        <div id="eventsList"></div>
+        <hr/>
+        
+<div> <img class="fixed-image" src="https://blog.clinicainternacional.com.pe/wp-content/uploads/2016/11/embarazo-citas-clinica.jpg" alt="Imagen" width="500" height="350">
+
+
+
+        
+      </div>
+    </div>
+  </section>
+
+</section> <!-- este es el fin de tu sección del calendario -->
+
+
+<!-- ============================
+     BOLETA / CONSTANCIA DE EMBARAZO
+============================ -->
+
+<section id="boleta" style="padding: 20px; max-width: 1050px; margin: auto;">
+
+    <h2 style="margin-bottom: 15px; color:#d13b67; font-weight:700;">
+        Boleta / Constancia de Embarazo
+    </h2>
+
+    <!-- FORMULARIO -->
+    <div style="padding: 20px; background: #fff; border-radius: 12px; 
+                box-shadow: 0 2px 8px #0002; margin-bottom: 25px;">
+
+        <label>Nombre completo</label>
+        <input id="b_nombre" type="text"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <label>Edad</label>
+        <input id="b_edad" type="number"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <label>Semanas de gestación</label>
+        <input id="b_semanas" type="number"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <label>F.U.M (Fecha de última menstruación)</label>
+        <input id="b_fum" type="date"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <label>F.P.P (Fecha probable de parto)</label>
+        <input id="b_fpp" type="date"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <!-- FECHA DE PRÓXIMA CITA -->
+        <label>Fecha de cita programada</label>
+        <input id="b_cita_fecha" type="date"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+        <label>Hora</label>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+
+            <!-- Campo para hora -->
+            <input id="b_cita_hora" type="time"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+            <!-- Selector AM/PM -->
+            <select id="b_cita_ampm"
+                    style="width:90px; padding:8px;">
+                <option>AM</option>
+                <option>PM</option>
+            </select>
+
+        </div>
+
+        <label>Lugar de atención</label>
+        <input id="b_cita_lugar" type="text"
+               style="width:100%; padding:8px; margin-bottom:10px;">
+
+               <div style="text-align: right; margin-top: 15px;">
+    <button onclick="generarBoleta()" 
+            style="padding:10px 20px; background:#ff6f91; border:none;
+                   color:#fff; border-radius:8px; cursor:pointer;">
+        Generar Boleta
+    </button>
+</div>
+
+
+
+    </div>
+
+
+    <!-- RESULTADO DE LA BOLETA -->
+    <div id="boletaResult" 
+         style="display:none; background:#fff; padding:25px; border-radius:12px; 
+                box-shadow:0 2px 8px #0002;">
+
+        <div style="text-align: center;">
+            <img src="file:///C:/Users/SERTEC-2019/Downloads/OnlineTurn-removebg-preview.png" 
+                 width="300" height="60">
+        </div>
+
+        <h2 style="color:#d13b67; font-weight:700;">Comprobante | Constancia de Embarazo</h2>
+
+        <!-- ⚠️ AQUI VIENE LA MODIFICACIÓN NUEVA: 2 COLUMNAS -->
+        <div id="boletaContent" style="line-height: 1.8; font-size: 16px; display:flex; justify-content:space-between; gap:25px;">
+            <div id="infoIzquierda" style="width:48%;"></div>
+            <div id="infoDerecha" style="width:48%;"></div>
+        </div>
+
+        <p style="text-align: right;">
+    <strong>Firma:</strong> __________________________
+</p>
+
+
+        <div style="text-align: right; margin-top: 10px;">
+    <button id="btnImprimir" onclick="window.print()" 
+            style="padding:10px 25px; background:#ff6f91; border:none;
+                   color:white; border-radius:8px; cursor:pointer;">
+        Imprimir
+    </button>
+</div>
+
+
+    </div>
+
+</section>
+
+<!-- SCRIPT -->
+<script>
+function generarBoleta() {
+    let nombre = document.getElementById("b_nombre").value.trim();
+    let edad = document.getElementById("b_edad").value.trim();
+    let semanas = document.getElementById("b_semanas").value.trim();
+    let fum = document.getElementById("b_fum").value.trim();
+    let fpp = document.getElementById("b_fpp").value.trim();
+    let fechaCita = document.getElementById("b_cita_fecha").value.trim();
+
+    // VALIDACIÓN
+    if (!nombre || !edad || !semanas || !fum || !fpp) {
+        alert("Complete todos los campos antes de generar la boleta.");
+        return;
+    }
+
+    // ---- FORMATEO SOLO DE FECHAS ----
+    function formatear(fecha) {
+        if (!fecha) return "";
+        let d = new Date(fecha);
+        let dia = String(d.getDate()).padStart(2, "0");
+        let mes = String(d.getMonth() + 1).padStart(2, "0");
+        let año = d.getFullYear();
+        return `${dia}/${mes}/${año}`;
+    }
+
+    let fumF = formatear(fum);
+    let fppF = formatear(fpp);
+    let fechaCitaF = formatear(fechaCita);
+
+    let hoy = new Date().toLocaleDateString("es-ES");
+
+    // 🔹 COLUMNA IZQUIERDA (NO SE TOCÓ NADA)
+    document.getElementById("infoIzquierda").innerHTML = `
+        <p><strong>Nombre:</strong> ${nombre}</p>
+        <p><strong>Edad:</strong> ${edad} años</p>
+        <p><strong>Semanas de gestación:</strong> ${semanas} semanas</p>
+        <p><strong>Fecha última menstruación:</strong> ${fumF}</p>
+        <p><strong>Fecha probable de parto:</strong> ${fppF}</p>
+        <p><strong>Fecha de emisión:</strong> ${hoy}</p>
+    `;
+
+    // 🔹 COLUMNA DERECHA (NO SE TOCÓ NADA)
+    document.getElementById("infoDerecha").innerHTML = `
+        <p><strong>Fecha de cita programada:</strong> ${fechaCitaF}</p>
+        <p><strong>Hora:</strong> ${document.getElementById("b_cita_hora").value} ${document.getElementById("b_cita_ampm").value}</p>
+        <p><strong>Lugar de atención:</strong> ${document.getElementById("b_cita_lugar").value}</p>
+    `;
+
+    document.getElementById("boletaResult").style.display = "block";
+}
+</script>
+
+
+<!-- IMPRESIÓN SOLO DE LA BOLETA Y OCULTAR BOTÓN -->
+<style>
+@media print {
+
+    /* Ocultar TODO */
+    body * { visibility: hidden !important; }
+
+    /* Mostrar solo la boleta */
+    #boletaResult, #boletaResult * {
+        visibility: visible !important;
+    }
+
+    /* Ocultar el botón solo en impresión */
+    #btnImprimir {
+        display: none !important;
+    }
+
+    /* Ajustar formato en PDF */
+    #boletaResult {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        box-shadow: none;
+        padding: 0 20px;
+    }
+}
+
+/* Colores suaves para las tarjetas */
+.card:nth-child(1) {
+    background: #ffe6f0; /* rosa pastel */
+}
+
+.card:nth-child(2) {
+    background: #ffe6f0; /* rosa pastel */
+}
+
+.card:nth-child(3) {
+    background: #ffe6f0; /* rosa pastel */
+}
+
+
+.chat-controls button {
+    background: #ff6f91 !important;
+}
+
+/* FIJA el contenedor derecho para que la imagen NO se mueva */
+#eventsList {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Mantiene la imagen fija siempre */
+.fixed-image {
+    display: block;
+    margin-top: 10px;
+    width: 500px;
+    height: 350px;
+    object-fit: cover;
+}
+
+.calendar-wrap {
+    align-items: flex-start;
+}
+
+
+.calendar-card:nth-child(2) {
+    height: auto;
+    max-height: 600px;   /* Ajusta este número si quieres */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#eventsList {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+
+
+#eventsList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+    grid-template-rows: repeat(3, auto);   /* 3 filas */
+    gap: 12px;
+    max-height: 350px;  /* ajusta si quieres */
+    overflow-y: auto;   /* scroll para más de 9 eventos */
+    padding-right: 5px;
+}
+
+/* Estilo opcional para cada tarjeta */
+#eventsList > div {
+    border: 1px solid #f2dce5;
+    padding: 10px;
+    border-radius: 10px;
+    background: white;
+}
+
+
+/* ===========================
+   RESPONSIVE PARA CELULARES
+=========================== */
+@media (max-width: 600px) {
+
+    /* Ajusta el contenedor general */
+    .container {
+        width: 96%;
+        padding: 0 10px;
+    }
+
+    /* Hacer que el header no se rompa */
+    .header-inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* HERO: imagen más pequeña y centrada */
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero img {
+        width: 90% !important;
+        height: auto;
+    }
+
+    /* MAPA más pequeño */
+    #map {
+        height: 220px !important;
+    }
+
+    /* Calendario adapta columnas */
+    .cal-grid {
+        grid-template-columns: repeat(7, minmax(32px, 1fr));
+    }
+
+    /* Eventos en 1 columna en celular */
+    #eventsList {
+        grid-template-columns: repeat(1, 1fr) !important;
+        max-height: none;
+    }
+
+    /* Imagen del calendario ajustada */
+    .fixed-image {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Boleta en una sola columna */
+    #boletaContent {
+        flex-direction: column !important;
+    }
+
+    #boletaContent > div {
+        width: 100% !important;
+    }
+
+    /* Inputs más grandes */
+    input, select {
+        font-size: 16px !important;
+    }
+
+    /* Chat */
+    .chat-box {
+        height: 160px !important;
+    }
+
+    /* Tarjetas de consejos en 1 columna */
+    .cards {
+        display: grid;
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+    }
+}
+
+
+
+</style>
+
+
+
+
+<!-- ============================
+      CHAT, TIPS, MAPA Y TODO JS ORIGINAL
+============================ -->
+
+<section id="chat" class="section">
+    <h2>Asistente MamáIA </h2>
+    <div class="chat-area">
+      <div id="chatBox" class="chat-box" role="log" aria-live="polite"></div>
+      <div class="chat-controls"><input id="userInput" placeholder="Escribe tu pregunta..." aria-label="Pregunta"/><button id="sendBtn">Enviar</button></div>
+    </div>
+    <p class="hint">La asistente da consejos generales; ante emergencias consulta a un profesional.</p>
+</section>
+
+<section id="resources" class="section">
+    <h2>Consejos y Recursos</h2>
+    <div class="cards">
+      <div class="card"><h3>Consejo del día</h3><p id="tipOfDay">Cargando consejo...</p></div>
+      <div class="card"><h3>Frase motivadora</h3><p id="phraseOfDay">Cargando frase...</p></div>
+      <div class="card"><h3>Contacto útil</h3><p>Guarda el número de tu centro de salud local.</p></div>
+    </div>
+</section>
+</main>
+
+<footer class="footer">© 2025 Maryori Milla | Online turn — Con cariño para las futuras mamás 💕</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const welcome = document.getElementById('welcome');
+const enterBtn = document.getElementById('enterBtn');
+enterBtn.addEventListener('click', () => { welcome.classList.remove('show'); setTimeout(()=>{ welcome.style.display='none'; },300); });
+setTimeout(()=>{ if(welcome){ welcome.classList.remove('show'); setTimeout(()=>{ welcome.style.display='none'; },300);} },3200);
+
+let map, userMarker, hospitalMarkers=[];
+function initMap(){ const mapEl=document.getElementById('map'); if(!mapEl||!window.L)return; const defaultCenter=[-12.0464,-77.0428]; map=L.map('map').setView(defaultCenter,13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map); if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(pos=>{ const lat=pos.coords.latitude, lon=pos.coords.longitude; map.setView([lat,lon],13); userMarker=L.marker([lat,lon]).addTo(map).bindPopup('Tu ubicación aproximada').openPopup(); findNearbyHospitals(lat,lon); }, ()=>{ addSampleHospitals(defaultCenter[0], defaultCenter[1]); }); } else { addSampleHospitals(defaultCenter[0], defaultCenter[1]); } document.getElementById('findBtn').addEventListener('click', async ()=>{ const q=document.getElementById('addressInput').value.trim(); if(!q){ if(userMarker){ const p=userMarker.getLatLng(); findNearbyHospitals(p.lat,p.lng); } else addSampleHospitals(defaultCenter[0], defaultCenter[1]); return; } const geo = await geocode(q); if(geo){ map.setView([geo.lat,geo.lon],13); if(userMarker) userMarker.setLatLng([geo.lat,geo.lon]); else userMarker=L.marker([geo.lat,geo.lon]).addTo(map); findNearbyHospitals(geo.lat,geo.lon); } else { alert('No se encontró la dirección. Mostrando hospitales de ejemplo.'); addSampleHospitals(defaultCenter[0], defaultCenter[1]); } }); }
+async function geocode(q){ try{ const url='https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q); const res=await fetch(url); const data=await res.json(); if(data&&data.length) return {lat:parseFloat(data[0].lat), lon:parseFloat(data[0].lon)}; return null;}catch(e){console.error('geocode',e);return null;} }
+function clearHospitals(){ hospitalMarkers.forEach(m=>map.removeLayer(m)); hospitalMarkers=[]; }
+async function findNearbyHospitals(lat,lon){ clearHospitals(); const radius=5000; const query=`[out:json][timeout:25];(node["amenity"="hospital"](around:${radius},${lat},${lon});way["amenity"="hospital"](around:${radius},${lat},${lon});relation["amenity"="hospital"](around:${radius},${lat},${lon}););out center 20;`; try{ const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:query}); const data=await res.json(); const elements=data.elements||[]; if(!elements.length) return addSampleHospitals(lat,lon); elements.slice(0,12).forEach(el=>{ const latp=el.lat||(el.center&&el.center.lat), lonp=el.lon||(el.center&&el.center.lon); if(latp&&lonp){ const name=(el.tags&&(el.tags.name||el.tags['official_name']))||'Hospital'; const marker=L.marker([latp,lonp]).addTo(map).bindPopup('<strong>'+name+'</strong><br/>'+(el.tags&&el.tags['phone']?el.tags['phone']:'')); hospitalMarkers.push(marker); } }); }catch(err){ console.error('Overpass failed',err); addSampleHospitals(lat,lon); } }
+function addSampleHospitals(lat,lon){ clearHospitals(); const samples=[{name:'Hospital Central',lat:lat+0.01,lon:lon+0.01},{name:'Clínica Materna',lat:lat-0.01,lon:lon-0.012},{name:'Centro de Salud',lat:lat+0.013,lon:lon-0.02}]; samples.forEach(s=>{ const m=L.marker([s.lat,s.lon]).addTo(map).bindPopup('<strong>'+s.name+'</strong>'); hospitalMarkers.push(m); }); }
+
+const state={date:new Date(), events:JSON.parse(localStorage.getItem('mama_events')||'[]')};
+
+function initCalendar(){ renderCalendar(); renderEventsList(); document.getElementById('prevMonth').addEventListener('click',()=>{changeMonth(-1)}); document.getElementById('nextMonth').addEventListener('click',()=>{changeMonth(1)}); }
+function changeMonth(delta){ const d=new Date(state.date); d.setMonth(d.getMonth()+delta); state.date=d; renderCalendar(); }
+function renderCalendar(){ const calGrid=document.getElementById('calGrid'); calGrid.innerHTML=''; const d=state.date; const year=d.getFullYear(), month=d.getMonth(); const first=new Date(year,month,1); const startDay=first.getDay(); const daysInMonth=new Date(year,month+1,0).getDate(); document.getElementById('calMonthYear').textContent = first.toLocaleString('es-ES',{month:'long', year:'numeric'}); const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']; days.forEach(h=>{ const el=document.createElement('div'); el.className='cal-cell'; el.style.fontWeight='700'; el.style.background='transparent'; el.textContent=h; calGrid.appendChild(el); }); for(let i=0;i<startDay;i++){ const el=document.createElement('div'); el.className='cal-cell'; calGrid.appendChild(el);} for(let day=1; day<=daysInMonth; day++){ const el=document.createElement('div'); el.className='cal-cell'; const num=document.createElement('div'); num.className='date-num'; num.textContent=day; el.appendChild(num); const cellDate=new Date(year,month,day); const evs = state.events.filter(e=>e.start===formatDateISO(cellDate)); evs.forEach(ev=>{ const evEl=document.createElement('div'); evEl.className='event'; evEl.textContent=ev.title; el.appendChild(evEl); }); const today=new Date(); if(cellDate.toDateString()===today.toDateString()) el.classList.add('today'); el.addEventListener('click', ()=>{ const title=prompt('Título del evento (ej: Control prenatal):'); if(!title) return; const type=prompt('Tipo (control/ecografia/vacuna/otro):','control')||'control'; const ev={title,start:formatDateISO(cellDate),type}; state.events.push(ev); localStorage.setItem('mama_events',JSON.stringify(state.events)); renderCalendar(); renderEventsList(); }); calGrid.appendChild(el); } }
+function formatDateISO(d){ return d.toISOString().slice(0,10); }
+function renderEventsList(){ const list=document.getElementById('eventsList'); list.innerHTML=''; if(!state.events.length){ list.innerHTML='<p>No hay eventos guardados.</p>'; return;} state.events.forEach((e,idx)=>{ const div=document.createElement('div'); div.style.padding='8px'; div.style.borderBottom='1px solid #faf1f6'; div.innerHTML=`<strong>${e.title}</strong> <div style="font-size:13px;color:#666">${e.start} • ${e.type}</div>`; const btn=document.createElement('button'); btn.textContent='Eliminar'; btn.style.marginLeft='8px'; btn.addEventListener('click', ()=>{ if(confirm('Eliminar evento?')){ state.events.splice(idx,1); localStorage.setItem('mama_events',JSON.stringify(state.events)); renderCalendar(); renderEventsList(); } }); div.appendChild(btn); list.appendChild(div); }); }
+function scrollEventsToBottom() {
+    const list = document.getElementById("eventsList");
+    list.scrollTop = list.scrollHeight;
+}
+
+
+function initChat(){ const chatBox=document.getElementById('chatBox'); const userInput=document.getElementById('userInput'); const sendBtn=document.getElementById('sendBtn'); appendChat('bot','Hola! Soy MamáIA 🤖. Estoy aquí para ayudarte con consejos durante tu embarazo. ¿En qué puedo ayudarte hoy?'); sendBtn.addEventListener('click',submitChat); userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') submitChat(); }); function submitChat(){ const text=userInput.value.trim(); if(!text) return; appendChat('user',text); userInput.value=''; appendChat('bot','Pensando...'); setTimeout(()=>{ const bots=Array.from(chatBox.querySelectorAll('p.bot')); if(bots.length) bots[bots.length-1].remove(); appendChat('bot',generateReply(text)); },600); } function appendChat(kind,text){ const p=document.createElement('p'); p.className=kind; p.textContent=(kind==='user'?'👩‍🍼 ':'🤖 ')+text; chatBox.appendChild(p); chatBox.scrollTop=chatBox.scrollHeight; } function generateReply(text){ const t=text.toLowerCase(); const emergency=['sangrado','dolor fuerte','dolor intenso','fiebre alta','desmayo','mareo fuerte','contracciones muy seguidas']; if(emergency.some(k=>t.includes(k))) return 'Si presentas síntomas graves, acude de inmediato al servicio de emergencias.'; if(t.includes('hola')||t.includes('buenas')) return '¡Hola! ¿Cómo te sientes hoy? Puedo ayudarte a agendar citas, encontrar hospitales o dar consejos.'; if(t.includes('cita')||t.includes('agenda')) return 'Para agendar, haz clic en la fecha deseada en el calendario y escribe un título para tu cita.'; if(t.includes('hospital')||t.includes('cerca')) return 'Ve a la sección de Hospitales y permite la geolocalización o escribe tu dirección y pulsa Buscar.'; if(t.includes('aliment')||t.includes('comer')||t.includes('dieta')) return 'Aliméntate con proteínas, frutas y verduras. Evita alimentos crudos y alcohol.'; if(t.includes('ejercicio')||t.includes('actividad')) return 'Ejercicios suaves como caminar 20 minutos son buenos. Consulta con tu médico antes.'; if(t.includes('náuseas')||t.includes('nauseas')||t.includes('vómito')||t.includes('vomit')) return 'Prueba comidas pequeñas, jengibre y mantener hidratación. Si no mejora, consulta.'; if(t.includes('emocion')||t.includes('ansiedad')||t.includes('depres')) return 'Hablar con alguien de confianza o tu médico puede ayudar. Busca apoyo profesional si lo necesitas.'; const tips=['Recuerda tus controles prenatales: son fundamentales.','Mantén hidratación y una dieta balanceada.','Evita alcohol y tabaco.','Realiza actividad suave y duerme bien.']; return tips[Math.floor(Math.random()*tips.length)]; } }
+
+const tips=['Come 5 porciones de frutas y verduras al día.','Realiza caminatas suaves de 20 minutos.','Mantén una botella de agua cerca y bebe con frecuencia.','Consulta cualquier cambio en tu salud con tu profesional.']; 
+const phrases=['Eres fuerte y capaz.','Un día a la vez, estás haciendo un gran trabajo.','Tu bienestar importa: cuida de ti.','Cada pequeño paso cuenta.']; 
+function initTips(){ 
+    document.getElementById('tipOfDay').textContent=tips[Math.floor(Math.random()*tips.length)]; 
+    document.getElementById('phraseOfDay').textContent=phrases[Math.floor(Math.random()*phrases.length)];
+}
+
+document.addEventListener('DOMContentLoaded',()=>{ 
+    initMap(); 
+    initCalendar(); 
+    initChat(); 
+    initTips(); 
+});
+</script>
+
+</body>
+</html>
